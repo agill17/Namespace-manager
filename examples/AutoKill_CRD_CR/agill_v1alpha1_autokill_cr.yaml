@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: amrit
+---
+apiVersion: agill.apps/v1alpha1
+kind: AutoKill
+metadata:
+  name: AutoKill-Namespace
+  namespace: amrit
+spec:
+  deleteNamespaceAfter: 0
+  disable: false
+

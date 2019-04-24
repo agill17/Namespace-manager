@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ns-manager
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: namespace-manager
+  namespace: ns-manager
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ns-manager
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+  - delete
+  - list
+- apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - servicemonitors
+  verbs:
+  - get
+  - create
+  - list
+- apiGroups:
+  - agill.apps
+  resources:
+  - '*'
+  verbs:
+  - '*'
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ns-manager
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ns-manager
+subjects:
+- kind: ServiceAccount
+  name: ns-manager
+  namespace: ns-manager
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: namespace-manager
+  namespace: ns-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: namespace-manager
+  template:
+    metadata:
+      labels:
+        name: namespace-manager
+    spec:
+      serviceAccountName: namespace-manager
+      containers:
+      - name: namespace-nanager
+        image: agill17/ns-manager:0.1.0
+        command:
+        - namespace-manager
+        imagePullPolicy: Always
+        env:
+        - name: WATCH_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: OPERATOR_NAME
+          value: "namespace-manager"
