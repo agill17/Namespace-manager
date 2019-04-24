@@ -6,7 +6,7 @@ metadata:
 apiVersion: agill.apps/v1alpha1
 kind: AutoKill
 metadata:
-  name: AutoKill-Namespace
+  name: autokill-namespace
   namespace: amrit
 spec:
   deleteNamespaceAfter: 0

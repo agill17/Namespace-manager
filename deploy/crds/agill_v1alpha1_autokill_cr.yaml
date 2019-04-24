@@ -1,0 +1,7 @@
+apiVersion: agill.apps/v1alpha1
+kind: AutoKill
+metadata:
+  name: example-autokill
+spec:
+  # Add fields here
+  size: 3
