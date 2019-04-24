@@ -21,10 +21,6 @@ import (
 
 var log = logf.Log.WithName("controller_autokill")
 
-/**
-* USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
-* business logic.  Delete these comments after modifying this file.*
- */
 
 // Add creates a new AutoKill Controller and adds it to the Manager. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
@@ -68,8 +64,6 @@ var _ reconcile.Reconciler = &ReconcileAutoKill{}
 
 // ReconcileAutoKill reconciles a AutoKill object
 type ReconcileAutoKill struct {
-	// This client, initialized using mgr.Client() above, is a split client
-	// that reads objects from the cache and writes to the apiserver
 	client client.Client
 	scheme *runtime.Scheme
 }
