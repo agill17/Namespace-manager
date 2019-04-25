@@ -7,7 +7,6 @@ import (
 	agillv1alpha1 "github.com/agill17/namespace-manager/pkg/apis/agill/v1alpha1"
 	"k8s.io/api/core/v1"
 
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -20,6 +19,7 @@ import (
 )
 
 var log = logf.Log.WithName("controller_autokill")
+const defaultTillerNamespace = "kube-system"
 
 
 // Add creates a new AutoKill Controller and adds it to the Manager. The Manager will set fields on the Controller
@@ -71,6 +71,14 @@ func (r *ReconcileAutoKill) Reconcile(request reconcile.Request) (reconcile.Resu
 		return reconcile.Result{}, err
 	}
 
+	// set default tiller-namespace
+	if cr.Spec.TillerNamespace == "" {
+		cr.Spec.TillerNamespace = defaultTillerNamespace
+		if err := r.client.Update(context.TODO(), cr); err != nil {
+			logrus.Errorf("Failed to setup default tiller-namespace for CR: %v in Namespace", cr.Name, cr.Namespace)
+		}
+	}
+
 	// get ns object
 	ns, err := r.nsObject(cr)
 	if err != nil {
@@ -84,21 +92,41 @@ func (r *ReconcileAutoKill) Reconcile(request reconcile.Request) (reconcile.Resu
 
 
 
-	return reconcile.Result{}, nil
+	return reconcile.Result{Requeue:true}, nil
 }
 
 
 func (r *ReconcileAutoKill) decideAndDelete(cr *agillv1alpha1.AutoKill, ns *v1.Namespace) error {
 
 	currentAge := calcTimeLeft(ns)
-	logrus.Infof("Current Age: %v ", currentAge)
+	hasLivedOverPolicyAge := currentAge >= cr.Spec.DeleteNamespaceAfter
 
-	if !cr.Spec.Disable && currentAge >= cr.Spec.DeleteNamespaceAfter && ns.Status.Phase != v1.NamespaceTerminating {
-		logrus.Warnf("Namespace: %v | Namespace Age: %v | CR Disabled: %v", cr.Namespace, currentAge, cr.Spec.Disable)
+	logrus.Warnf("Namespace: %v | Namespace Age: %v | CR Disabled: %v | Policy Age: %v", cr.Namespace, currentAge, cr.Spec.Disable, cr.Spec.DeleteNamespaceAfter)
+
+	if !cr.Spec.Disable && hasLivedOverPolicyAge && ns.Status.Phase != v1.NamespaceTerminating {
+
+
+		// delete helm releases ?
+		if cr.Spec.DeleteAssociatedHelmReleases {
+
+			// get helm releases associated to this namespace
+			helmReleases , err := getReleasesForNs(cr.Namespace, cr.Spec.TillerNamespace)
+			if err != nil {
+				return err
+			}
+
+			// delete helm releases first
+			deleteReleases(cr.Spec.TillerNamespace, helmReleases)
+
+		}
+
+
+		// delete namespace
 		logrus.Warnf("Deleting Namespace: %v", cr.Namespace)
 		if err := r.deleteNs(ns); err != nil && !errors.IsForbidden(err) {
 			return err
 		}
+
 	}
 	return nil
 }

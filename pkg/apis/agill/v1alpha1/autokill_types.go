@@ -9,15 +9,14 @@ import (
 
 // AutoKillSpec defines the desired state of AutoKill
 type AutoKillSpec struct {
-	DeleteNamespaceAfter int `json:"deleteNamespaceAfter"`
+	DeleteNamespaceAfter int `json:"deleteNamespaceAfter,required"`
+	DeleteAssociatedHelmReleases bool `json:"deleteAssociatedHelmReleases"`
 	Disable bool `json:"disable"`
+	TillerNamespace string `json:"tillerNamespace,omitempty"`
+
 }
 
-// AutoKillStatus defines the observed state of AutoKill
-type AutoKillStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-}
+type AutoKillStatus struct {}
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 

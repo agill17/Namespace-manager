@@ -19,6 +19,7 @@ rules:
   resources:
   - namespaces
   - pods
+  - pods/portforward
   - services
   - endpoints
   - persistentvolumeclaims
@@ -73,7 +74,7 @@ spec:
       serviceAccountName: namespace-manager
       containers:
       - name: namespace-nanager
-        image: agill17/namespace-manager:0.1.0
+        image: agill17/namespace-manager:0.1.1
         command:
         - namespace-manager
         imagePullPolicy: Always

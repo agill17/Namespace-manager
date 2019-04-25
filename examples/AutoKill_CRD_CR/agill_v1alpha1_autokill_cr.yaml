@@ -9,6 +9,7 @@ metadata:
   name: autokill-namespace
   namespace: amrit
 spec:
-  deleteNamespaceAfter: 0
+  deleteNamespaceAfter: 1
   disable: false
+  deleteAssociatedHelmReleases: true
 
