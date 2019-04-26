@@ -22,8 +22,8 @@ func (r *ReconcileAutoKill) nsObject(cr *agillv1alpha1.AutoKill) (*v1.Namespace,
 	return ns, nil
 }
 
-// calcTimeLeft will return currentAge of ns by subtracting currentTime with nsCreationTime in Hours
-func calcTimeLeft(ns *v1.Namespace) int {
+// calcCurrentAge will return currentAge of ns by subtracting currentTime with nsCreationTime in Hours
+func calcCurrentAge(ns *v1.Namespace) int {
 	return int(time.Now().Sub(ns.CreationTimestamp.Time).Hours())
 }
 
@@ -38,15 +38,17 @@ func (r *ReconcileAutoKill)deleteNs(ns *v1.Namespace) error {
 }
 
 //deleteReleases deletes list of helm releases
-func deleteReleases(tillerNamespace string, releaseNames []string) {
+func deleteReleases(tillerNamespace string, releaseNames []string) error {
 	logrus.Warnf("Helm Releases to delete: %v", releaseNames)
 	releases := strings.Join(releaseNames, " ")
 	delCmd := fmt.Sprintf("helm del --purge --tiller-namespace=%v %v", tillerNamespace, releases)
-	logrus.Infof("Delete Command: %v", delCmd)
-	out, _ := runACommand(delCmd)
+	out, err := runACommand(delCmd)
+	if err != nil {
+		return err
+	}
 	logrus.Infof("Helm delete output: %v", out)
-
-}
+	return nil
+}	
 
 //getReleasesForNs gets list of releases that belongs to a namespace
 func getReleasesForNs(ns ,tillerNamespace string) ([]string,error) {
@@ -72,3 +74,4 @@ func runACommand(cmd string) (string, error) {
 	}
 	return string(out), err
 }
+

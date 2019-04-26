@@ -1,6 +1,6 @@
 FROM alpine
 
-ENV HELM_VERSION="v2.10.0"
+ENV HELM_VERSION="v2.13.1"
 
 RUN apk add --no-cache ca-certificates \
     && wget -q https://storage.googleapis.com/kubernetes-helm/helm-${HELM_VERSION}-linux-amd64.tar.gz -O - | tar -xzO linux-amd64/helm > /usr/local/bin/helm \
