@@ -9,7 +9,6 @@ metadata:
   name: autokill-namespace
   namespace: agill
 spec:
-  deleteNamespaceAfter: 0
+  deleteNamespaceAfter: 1
   disable: false
   deleteAssociatedHelmReleases: true
-#  tillerNamespace: ops
