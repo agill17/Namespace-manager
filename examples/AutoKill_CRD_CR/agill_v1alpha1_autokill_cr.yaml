@@ -9,6 +9,10 @@ metadata:
   name: autokill-namespace
   namespace: agill
 spec:
+  # hours
   deleteNamespaceAfter: 1
   disable: false
+  # deletes ALL associated helm releases
   deleteAssociatedHelmReleases: true
+  # tiller-namespace -- defaults to kube-system 
+  #tillerNamespace: your-tiller-namespace
